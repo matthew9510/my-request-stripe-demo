@@ -3,22 +3,24 @@ html
   head
     meta(charset='utf-8')
     meta(name='viewport', content='width=device-width, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no')
-    meta(name='twitter:card', content='summary')
-    meta(name='twitter:site', content='@stripe')
-    meta(name='twitter:title', content='Rocket Rides')
-    meta(name='twitter:description', content='Rocket Rides is an on-demand platform built on top of Stripe Connect.')
-    meta(name='twitter:image', content='https://rocketrides.io/images/rocketrides.png')
-    title Rocket Rides
+    //- meta(name='twitter:card', content='summary')
+    //- meta(name='twitter:site', content='@stripe')
+    //- meta(name='twitter:title', content='Rocket Rides')
+    //- meta(name='twitter:description', content='Rocket Rides is an on-demand platform built on top of Stripe Connect.')
+    //- meta(name='twitter:image', content='https://rocketrides.io/images/rocketrides.png')
+    title My Request
     link(rel='stylesheet', type='text/css', href='/stylesheets/rocketrides.css')
     link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=Barlow:500,600')
-    link(rel='icon', type='image/png', sizes='64x64', href='/images/favicon.png')
+    link(rel='icon', type='image/png', sizes='64x64', href='/images/my-request.png')
 
   body
     header
       #top
+        //- img(src='/images/my-request-white.svg').icon-logo
         if pilot
           .logo
             a.rocketrides.mark(href='/')
+              img(src='/images/my-request-white.svg').icon-logo
           .links
             if pilot.stripeAccountId
               a(href='/pilots/dashboard') Dashboard
@@ -26,6 +28,7 @@ html
         else
           .logo
             a.rocketrides(href='/')
+              img(src='/images/my-request-white.svg').icon-logo
           .links
             a(href='/pilots/login') Log in
       block header

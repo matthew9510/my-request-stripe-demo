@@ -112,11 +112,11 @@ a.arrow {
   flex: 1;
 }
 #top a.rocketrides {
-  display: inline-block;
-  min-width: 215px;
-  height: 20px;
-  padding-left: 75px;
-  background: url(/images/rocketrides.svg) left center no-repeat;
+}
+img.icon-logo{
+  margin-top: 20px;
+  height:40px;
+  width: auto;
 }
 
 #top .links a {
@@ -611,6 +611,10 @@ form a.button {
   line-height: 28px;
 }
 
+.intro a {
+  font-size: .8em !important;
+}
+
 .features {
   display: flex;
   width: 100%;
@@ -628,8 +632,13 @@ form a.button {
   background-repeat: no-repeat;
 }
 
+img.schedule{
+  height:40px;
+  width: auto;
+}
 .features section.schedule {
-  background-image: url(/images/feature-schedule.svg);
+  background-image: url(/images/calendar.png);
+  background-size: 40px 40px;
 }
 
 .features section.earnings {
