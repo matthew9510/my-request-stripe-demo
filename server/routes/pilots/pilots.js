@@ -137,8 +137,8 @@ router.get('/signup', (req, res) => {
 router.post('/signup', async (req, res, next) => {
   const body = Object.assign({}, req.body, {
     // Use `type` instead of `pilot-type` for saving to the DB.
-    type: req.body['pilot-type'],
-    'pilot-type': undefined,
+    // type: req.body['pilot-type'],
+    // 'pilot-type': undefined,
   });
 
   // Check if we have a logged-in pilot
