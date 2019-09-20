@@ -112,11 +112,16 @@ a.arrow {
   flex: 1;
 }
 #top a.rocketrides {
+  display: flex;
+  text-decoration: none;
 }
 img.icon-logo{
-  margin-top: 20px;
+  margin-top: 15px;
   height:40px;
   width: auto;
+}
+h1.logo-name{
+  padding-left: 15px;
 }
 
 #top .links a {
