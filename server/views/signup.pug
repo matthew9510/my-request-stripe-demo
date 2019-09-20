@@ -22,14 +22,14 @@ block content
 
       when 'profile'
         form(method='POST', autocomplete='off')
-          h4.pilot-header Account type
-          .pilot-options
-            label.pilot-option
-              input(type='radio', name='pilot-type', value='individual', id='po-individual', checked=true)
-              span Independent pilot
-            label.pilot-option
-              input(type='radio', name='pilot-type', value='company', id='po-company')
-              span Company of pilots
+          //- h4.pilot-header Account type
+          //- .pilot-options
+          //-   label.pilot-option
+          //-     input(type='radio', name='pilot-type', value='individual', id='po-individual', checked=true)
+          //-     span Independent pilot
+          //-   label.pilot-option
+          //-     input(type='radio', name='pilot-type', value='company', id='po-company')
+          //-     span Company of pilots
 
           h4.pilot-header#account-info Personal information
           fieldset
@@ -38,36 +38,36 @@ block content
             .row.pilot-info.individual(label='* Last Name')
               input(type='text', name='lastName', placeholder='Diaz')
             .row.pilot-info.company.hidden(label='* Company Name')
-              input(type='text', name='businessName', placeholder='Infinity & Beyond LLC')
+              input(type='text', name='businessName', placeholder='Rock Out Inc.', value='Rock Out Inc.')
             .row(label='Address')
               input(type='text', name='address', placeholder='510 Townsend St', value='510 Townsend St')
             .row(label='Postal Code')
               input(type='text', name='postalCode', placeholder='94103', value='94103')
             .row(label='City')
-              input(type='text', name='city', placeholder='San Francisco', value='San Francisco')
+              input(type='text', name='city', placeholder='San Diego', value='San Diego')
             .row(label='State')
               input(type='text', name='state', placeholder='CA', value='CA')
             .row.select(label='Country')
               select(name='country')
                 option(value='US') United States
-                option(value='US') Canada
+                option(value='Canada') Canada
           aside * Indicates required fields
-          h4 Rocket information
-          fieldset
-            .row(label='Rocket')
-              input(type='text', name='rocket[model]', placeholder='Lightspeed 3000', value='Lightspeed 3000')
-            .row(label='License')
-              input(type='text', name='rocket[license]', placeholder='FUTURE 7', value='FUTURE 7')
-            .row.select(label='Color')
-              select(name='rocket[color]')
-                option(value='red') Red
-                option(value='orange') Orange
-                option(value='yellow') Yellow
-                option(value='green') Green
-                option(value='blue', selected) Blue
-                option(value='purple') Purple
-                option(value='black') Black
-                option(value='white') White
+          //- h4 Performer information
+          //- fieldset
+          //-   .row(label='Rocket')
+          //-     input(type='text', name='rocket[model]', placeholder='Lightspeed 3000', value='Lightspeed 3000')
+          //-   .row(label='License')
+          //-     input(type='text', name='rocket[license]', placeholder='FUTURE 7', value='FUTURE 7')
+          //-   .row.select(label='Color')
+          //-     select(name='rocket[color]')
+          //-       option(value='red') Red
+          //-       option(value='orange') Orange
+          //-       option(value='yellow') Yellow
+          //-       option(value='green') Green
+          //-       option(value='blue', selected) Blue
+          //-       option(value='purple') Purple
+          //-       option(value='black') Black
+          //-       option(value='white') White
           h4 Payment information
           .stripe-information
             p We use Stripe to make sure you get paid on time and to keep your personal bank and details secure. Click #[strong Save and continue] to set up your payments on Stripe.
@@ -84,10 +84,10 @@ block footer
 
     case step
       when 'account'
-        p To get started, Rocket Rides will create an account for their pilots on their own backend. The platform can use any kind of authentication here, like email or OAuth. A real product would typically have terms of service and a privacy policy linked here as well.
+        p To get started, My Request will create an account for their permformers on their own backend. The platform can use any kind of authentication here, like email or OAuth. A real product would typically have terms of service and a privacy policy linked here as well.
 
       when 'profile'
-        p The platform can choose to request additional information from the user before it collects any payments details. Here, Rocket Rides asks a few questions about pilots and their rockets. This information will be stored in the platform’s database.
+        p The platform can choose to request additional information from the user before it collects any payments details. Here, My Request asks a few questions about information about the performers. This information will be stored in the platform’s database.
 
       when 'payments'
         p This platform uses #[a(href='https://stripe.com/connect/account-types') Connect Express] accounts to pay its pilots. We’ll pass some of the user information we have collected to Express in order to make onboarding as simple as possible. This app is in test mode, so no real payments are going through. Use the Stripe test Visa debit card number as a payout method: #[strong 4000 0566 5566 5556]

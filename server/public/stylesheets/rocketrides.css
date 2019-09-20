@@ -152,10 +152,12 @@ h1.title.short-form {
   width: 100%;
   min-height: 44px;
   line-height: 44px;
+  
 }
 .message {
   max-width: 800px;
   margin: 0 auto;
+  font-size: .99em;
 }
 
 /* Footer */
@@ -832,9 +834,9 @@ img.schedule{
 }
 
 .rides .no-rides .rocket {
-  width: 52px;
-  height: 52px;
-  background-image: url(/images/rocket.svg);
+  width: 91px;
+  height: 91px;
+  background-image: url(/images/my-request.svg);
 }
 .rides .no-rides h1 {
   color: #525f7f;
@@ -1115,6 +1117,7 @@ img.schedule{
   .banner {
     line-height: 24px;
     padding: 11px 20px;
+    font-size: .98em;
   }
 
   .banner .secondary-text {
