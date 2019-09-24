@@ -113,7 +113,7 @@ app.use((err, req, res) => {
   });
 });
 
-// Start the server on the correct port
+//Start the server on the correct port
 const server = app.listen(process.env.PORT || config.port, () => {
   console.log('🚀 Rocket Rides server started:', config.publicDomain);
 });

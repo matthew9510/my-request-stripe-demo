@@ -52,6 +52,138 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
 });
 
 /**
+ * GET /pilots/dashboard-requests
+ *
+ * Show the Dashboard for the logged-in pilot with the overview,
+ * their ride history, and the ability to simulate a test ride.
+ *
+ * Use the `pilotRequired` middleware to ensure that only logged-in
+ * pilots can access this route.
+ */
+router.get('/dashboard-requests', pilotRequired, async (req, res) => {
+  const pilot = req.user;
+  // Retrieve the balance from Stripe
+  const balance = await stripe.balance.retrieve({
+    stripe_account: pilot.stripeAccountId,
+  });
+  // Fetch the pilot's recent rides
+  const rides = await pilot.listRecentRides();
+  const ridesTotalAmount = rides.reduce((a, b) => {
+    return a + b.amountForPilot();
+  }, 0);
+  // There is one balance for each currencies used: as this 
+  // demo app only uses USD we'll just use the first object
+  res.render('dashboard-requests', {
+    pilot: pilot,
+    balanceAvailable: balance.available[0].amount,
+    balancePending: balance.pending[0].amount,
+    ridesTotalAmount: ridesTotalAmount,
+    rides: rides,
+  });
+});
+
+/**
+ * POST /pilots/request
+ *
+ * Generate a test ride with sample data for the logged-in pilot.
+ */
+router.post('/auth-capture', pilotRequired,  (req, res, next) => {
+  
+  // const pilot = req.user;
+  // // Find a random passenger
+  // const passenger = await Passenger.getRandom();
+  // // Create a new ride for the pilot and this random passenger
+  // const ride = new Ride({
+  //   pilot: pilot.id,
+  //   passenger: passenger.id,
+  //   // Generate a random amount between $10 and $100 for this ride
+  //   amount: getRandomInt(1000, 10000),
+  // });
+  // // Save the ride
+  const ride = JSON.parse(req.body.ride)
+  console.log(ride.stripeChargeId)
+  try{
+    const charge = stripe.charges.capture(ride.stripeChargeId + 1, (err, charge)=>{
+   // console.log("cb done", charge, err) console.log("Invalid charge token")
+    if(err) throw(err)
+    try {
+     // console.log("##########################################################################")
+      res.redirect('/pilots/dashboard-requests');
+     
+    } catch (err1) {
+      throw(err)
+      console.log(err1, "catch");
+      // Return a 402 Payment Required error code
+      res.sendStatus(402);
+      throw(err1)
+      next(`Stripe Charge id not found: ${err.message}`);
+    }
+
+  })  }catch(err){
+    console.log("##########################################################################", err)
+
+  }
+  
+  
+});
+
+/**
+ * POST /pilots/request-accept
+ *
+ * Generate a test ride with sample data for the logged-in pilot.
+ */
+router.post('/auth-request', pilotRequired, async (req, res, next) => {
+  const pilot = req.user;
+  // Find a random passenger
+  const passenger = await Passenger.getRandom();
+  // Create a new ride for the pilot and this random passenger
+  const ride = new Ride({
+    pilot: pilot.id,
+    passenger: passenger.id,
+    // Generate a random amount between $10 and $100 for this ride
+    amount: getRandomInt(1000, 10000),
+  });
+  // Save the ride
+  await ride.save();
+  try {
+    // Get a test source, using the given testing behavior
+    let source;
+    if (req.body.immediate_balance) {
+      source = getTestSource('immediate_balance'); // be cautious
+    } else if (req.body.payout_limit) {
+      source = getTestSource('payout_limit');
+    }
+    // Create a charge and set its destination to the pilot's account
+    const charge = await stripe.charges.create({
+      source: source,
+      amount: ride.amount,
+      currency: ride.currency,
+      description: config.appName,
+      statement_descriptor: config.appName,
+      capture: false,
+      // The destination parameter directs the transfer of funds from platform to pilot
+      transfer_data: {
+        // Send the amount for the pilot after collecting a 20% platform fee:
+        // the `amountForPilot` method simply computes `ride.amount * 0.8`
+        amount: ride.amountForPilot(),
+        // The destination of this charge is the pilot's Stripe account
+        destination: pilot.stripeAccountId,
+      },
+    });
+    // Add the Stripe charge reference to the ride and save it
+    ride.stripeChargeId = charge.id;
+    ride.save();
+    
+  } catch (err) {
+    console.log(err);
+    // Return a 402 Payment Required error code
+    res.sendStatus(402);
+    next(`Error adding token to customer: ${err.message}`);
+  }
+  res.redirect('/pilots/dashboard-requests');
+})
+
+/**
  * POST /pilots/rides
  *
  * Generate a test ride with sample data for the logged-in pilot.
