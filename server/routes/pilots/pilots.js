@@ -9,6 +9,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const Pilot = require('../../models/pilot');
 const Ride = require('../../models/ride');
 const Passenger = require('../../models/passenger');
+const Song = require("../../models/song");
 
 // Middleware: require a logged-in pilot
 function pilotRequired(req, res, next) {
@@ -67,8 +68,8 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
     stripe_account: pilot.stripeAccountId,
   });
   // Fetch the pilot's recent rides
-  const rides = await pilot.listRecentRides();
-  const ridesTotalAmount = rides.reduce((a, b) => {
+  const songs = await pilot.listRecentSongs();
+  const songsTotalAmount = songs.reduce((a, b) => {
     return a + b.amountForPilot();
   }, 0);
   // There is one balance for each currencies used: as this 
@@ -77,8 +78,8 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
     pilot: pilot,
     balanceAvailable: balance.available[0].amount,
     balancePending: balance.pending[0].amount,
-    ridesTotalAmount: ridesTotalAmount,
-    rides: rides,
+    songsTotalAmount: songsTotalAmount,
+    songs: songs,
   });
 });
 
@@ -95,7 +96,7 @@ function  captureCharge(chargeId, res){
  * Generate a test ride with sample data for the logged-in pilot.
  */
 router.post('/auth-capture', pilotRequired,  (req, res, next) => {
-  const ride = JSON.parse(req.body.ride)
+  const song = JSON.parse(req.body.song)
   // const pilot = req.user;
   // // Find a random passenger
   // const passenger = await Passenger.getRandom();
@@ -110,7 +111,7 @@ router.post('/auth-capture', pilotRequired,  (req, res, next) => {
   try{
    
    // console.log("cb done", charge, err) console.log("Invalid charge token")
-   captureCharge(ride.stripeChargeId, res)
+   captureCharge(song.stripeChargeId, res)
     // try {
     //  // console.log("##########################################################################")
     //   res.redirect('/pilots/dashboard-requests');
@@ -143,14 +144,14 @@ router.post('/auth-request', pilotRequired, async (req, res, next) => {
   // Find a random passenger
   const passenger = await Passenger.getRandom();
   // Create a new ride for the pilot and this random passenger
-  const ride = new Ride({
+  const song = new Song({
     pilot: pilot.id,
     passenger: passenger.id,
     // Generate a random amount between $10 and $100 for this ride
     amount: getRandomInt(1000, 10000),
   });
   // Save the ride
-  await ride.save();
+  await song.save(); // saves to the database
   try {
     // Get a test source, using the given testing behavior
     let source;
@@ -162,8 +163,8 @@ router.post('/auth-request', pilotRequired, async (req, res, next) => {
     // Create a charge and set its destination to the pilot's account
     const charge = await stripe.charges.create({
       source: source,
-      amount: ride.amount,
-      currency: ride.currency,
+      amount: song.amount,
+      currency: song.currency,
       description: config.appName,
       statement_descriptor: config.appName,
       capture: false,
@@ -171,14 +172,14 @@ router.post('/auth-request', pilotRequired, async (req, res, next) => {
       transfer_data: {
         // Send the amount for the pilot after collecting a 20% platform fee:
         // the `amountForPilot` method simply computes `ride.amount * 0.8`
-        amount: ride.amountForPilot(),
+        amount: song.amountForPilot(),
         // The destination of this charge is the pilot's Stripe account
         destination: pilot.stripeAccountId,
       },
     });
     // Add the Stripe charge reference to the ride and save it
-    ride.stripeChargeId = charge.id;
-    ride.save();
+    song.stripeChargeId = charge.id;
+    song.save();
     
   } catch (err) {
     console.log(err);

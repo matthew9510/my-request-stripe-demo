@@ -25,21 +25,21 @@ block content
       //-   p
       //-     a(href='/pilots/stripe/dashboard') View payouts on Stripe
     section.rides
-      h4 Recent performances
-      if rides.length == 0
+      h4 Requested Songs
+      if songs.length == 0
         .no-rides
           .rocket
-          h1 No performances to display yet
+          h1 No Songs to display yet
           h2 Rock out rockstar!
       else
         .list
-          each ride in rides
+          each song in songs
             .row
-              .cell.name= ride.passenger.displayName()
-              .cell.date= moment(new Date(Date.parse(ride.created))).calendar()
-              .cell.price $#{(ride.amountForPilot() / 100).toFixed(2)}
+              .cell.name= song.passenger.displayName()
+              .cell.date= moment(new Date(Date.parse(song.created))).calendar()
+              .cell.price $#{(song.amountForPilot() / 100).toFixed(2)}
               form(action='/pilots/auth-capture', method='POST', autocomplete='off')
-                input(type='text', name="ride", hidden=true, value=ride)
+                input(type='text', name="song", hidden=true, value=song)
                 button(type='submit', name="accept-the-request", class='primary-action') Accept request
 
 block footer

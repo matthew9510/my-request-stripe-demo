@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcryptjs');
 const Ride = require('./ride');
+const Song = require('./song');
 
 // Use native promises.
 mongoose.Promise = global.Promise;
@@ -44,6 +45,14 @@ PilotSchema.methods.displayName = function() {
 };
 
 // List rides of the past week for the pilot.
+PilotSchema.methods.listRecentSongs = function() {
+  const weekAgo = Date.now() - (7*24*60*60*1000);
+  return Song.find({ pilot: this, created: { $gte: weekAgo } })
+    .populate('passenger')
+    .sort({ created: -1 })
+    .exec();
+};
+
 PilotSchema.methods.listRecentRides = function() {
   const weekAgo = Date.now() - (7*24*60*60*1000);
   return Ride.find({ pilot: this, created: { $gte: weekAgo } })
@@ -51,6 +60,9 @@ PilotSchema.methods.listRecentRides = function() {
     .sort({ created: -1 })
     .exec();
 };
+
+
+
 
 // Generate a password hash (with an auto-generated salt for simplicity here).
 PilotSchema.methods.generateHash = function(password) {
