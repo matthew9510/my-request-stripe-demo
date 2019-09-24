@@ -82,13 +82,20 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
   });
 });
 
+function  captureCharge(chargeId, res){
+  const charge = stripe.charges.capture(chargeId, (err, charge)=>{
+   if(err) throw new Error(err)
+   else res.redirect('/pilots/dashboard-requests');
+
+  })
+}
 /**
  * POST /pilots/request
  *
  * Generate a test ride with sample data for the logged-in pilot.
  */
 router.post('/auth-capture', pilotRequired,  (req, res, next) => {
-  
+  const ride = JSON.parse(req.body.ride)
   // const pilot = req.user;
   // // Find a random passenger
   // const passenger = await Passenger.getRandom();
@@ -100,27 +107,26 @@ router.post('/auth-capture', pilotRequired,  (req, res, next) => {
   //   amount: getRandomInt(1000, 10000),
   // });
   // // Save the ride
-  const ride = JSON.parse(req.body.ride)
-  console.log(ride.stripeChargeId)
   try{
-    const charge = stripe.charges.capture(ride.stripeChargeId + 1, (err, charge)=>{
+   
    // console.log("cb done", charge, err) console.log("Invalid charge token")
-    if(err) throw(err)
-    try {
-     // console.log("##########################################################################")
-      res.redirect('/pilots/dashboard-requests');
+   captureCharge(ride.stripeChargeId, res)
+    // try {
+    //  // console.log("##########################################################################")
+    //   res.redirect('/pilots/dashboard-requests');
      
-    } catch (err1) {
-      throw(err)
-      console.log(err1, "catch");
-      // Return a 402 Payment Required error code
-      res.sendStatus(402);
-      throw(err1)
-      next(`Stripe Charge id not found: ${err.message}`);
-    }
+    // } catch (err1) {
+    //   throw(err)
+    //   console.log(err1, "catch");
+    //   // Return a 402 Payment Required error code
+    //   res.sendStatus(402);
+    //   throw(err1)
+    //   next(`Stripe Charge id not found: ${err.message}`);
+    // }
 
-  })  }catch(err){
+   }catch(err){
     console.log("##########################################################################", err)
+    next(`Stripe Charge id not found: ${err.message}`);
 
   }
   
