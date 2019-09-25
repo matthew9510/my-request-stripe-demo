@@ -53,9 +53,9 @@ block content
               .cell.name= song.passenger.displayName()
               .cell.date= moment(new Date(Date.parse(song.created))).calendar()
               .cell.price $#{(song.amountForPilot() / 100).toFixed(2)}
-              form(action='/pilots/auth-capture', method='POST', autocomplete='off')
+              form(action='/pilots/auth-capture', method='POST', autocomplete='off', class="accept-request")
                 input(type='text', name="songid", hidden=true, value=song._id)
-                button(type='submit', name="accept-the-request", class='primary-action') Accept request
+                button(type='submit', name="accept-the-request", class="accept-request") Accept request
 
 block footer
   .annotation.card.dashboard-banner(class=(showBanner ? '' : 'hidden'))
