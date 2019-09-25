@@ -10,6 +10,7 @@ const Pilot = require('../../models/pilot');
 const Ride = require('../../models/ride');
 const Passenger = require('../../models/passenger');
 const Song = require("../../models/song");
+const querystring = require('querystring');
 
 // Middleware: require a logged-in pilot
 function pilotRequired(req, res, next) {
@@ -36,6 +37,7 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
   });
   // Fetch the pilot's recent rides
   const rides = await pilot.listRecentRides();
+  console.log("showing rides",rides)
   const ridesTotalAmount = rides.reduce((a, b) => {
     return a + b.amountForPilot();
   }, 0);
@@ -63,12 +65,15 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
  */
 router.get('/dashboard-requests', pilotRequired, async (req, res) => {
   const pilot = req.user;
+  console.log(req.app.locals.currentSong,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ sdfghj")
+  console.log(req.app.locals,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ sdfghj")
   // Retrieve the balance from Stripe
   const balance = await stripe.balance.retrieve({
     stripe_account: pilot.stripeAccountId,
   });
   // Fetch the pilot's recent rides
   const songs = await pilot.listRecentSongs();
+  console.log("showing songs", songs)
   const songsTotalAmount = songs.reduce((a, b) => {
     return a + b.amountForPilot();
   }, 0);
@@ -80,13 +85,19 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
     balancePending: balance.pending[0].amount,
     songsTotalAmount: songsTotalAmount,
     songs: songs,
+    currentSong: songs[0]
   });
+  currentSong: req.app.locals.currentSong
 });
 
-function  captureCharge(chargeId, res){
-  const charge = stripe.charges.capture(chargeId, (err, charge)=>{
+function  captureCharge(song, res){
+  const charge = stripe.charges.capture(song.stripeChargeId, (err, charge)=>{
    if(err) throw new Error(err)
-   else res.redirect('/pilots/dashboard-requests');
+   else {
+     res.locals.currentSong = song;
+
+     res.redirect('/pilots/dashboard-requests' + '?' +  querystring.stringify(song))
+    ;}
 
   })
 }
@@ -111,7 +122,8 @@ router.post('/auth-capture', pilotRequired,  (req, res, next) => {
   try{
    
    // console.log("cb done", charge, err) console.log("Invalid charge token")
-   captureCharge(song.stripeChargeId, res)
+   captureCharge(song, res)
+ 
     // try {
     //  // console.log("##########################################################################")
     //   res.redirect('/pilots/dashboard-requests');
@@ -127,7 +139,7 @@ router.post('/auth-capture', pilotRequired,  (req, res, next) => {
 
    }catch(err){
     console.log("##########################################################################", err)
-    next(`Stripe Charge id not found: ${err.message}`);
+    //next(`Stripe Charge id not found: ${err.message}`);
 
   }
   

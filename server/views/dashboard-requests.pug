@@ -11,6 +11,21 @@ block content
           a(href='/pilots/stripe/dashboard?account=true') View Stripe account
       .block.performance
         h1 Demo Performance
+    
+
+
+
+    section.rides
+      if currentSong 
+        h4 Current Song
+        .list
+          .row
+            .cell.price #{currentSong.amount}
+            .cell.date= moment(new Date(Date.parse(currentSong.created))).calendar()
+            .cell.name= currentSong.passenger.displayName()
+            .cell.date= moment(new Date(Date.parse(currentSong.created))).calendar()
+            .cell.price $#{(currentSong.amountForPilot() / 100).toFixed(2)}
+         
       //- .block.week
       //-   p This week
       //-   h1 $#{(ridesTotalAmount / 100).toFixed(2)}
