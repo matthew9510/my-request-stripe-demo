@@ -90,7 +90,7 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
   //currentSong: req.app.locals.currentSong
 });
 
-function captureCharge(song, res){
+function captureCharge(song, req, res){
   console.log("\ninside capture charge", song)
   const charge = stripe.charges.capture(song.stripeChargeId, (err, charge)=>{
    if(err) return new Error(err) // do we need to throw?
@@ -111,12 +111,12 @@ router.post('/auth-capture', pilotRequired,  async(req, res, next) => {
   const pilot = req.user;
   const songs = await pilot.listRecentSongs();
   for(let song of songs){
-    console.log("typeof song._id", typeof song._id) //object
+    //console.log("typeof song._id", typeof song._id) //object
     if (song._id == req.body.songid){ // Note: song._id is an object and req.body.songid is a string
       console.log("Found The SONG!")
       console.log(song)
       try{
-        captureCharge(song, res);
+        captureCharge(song, req, res);
       } catch(err){
         console.log(err)
         res.redirect('/pilots/dashboard-requests')
