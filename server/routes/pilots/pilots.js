@@ -65,15 +65,15 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
  */
 router.get('/dashboard-requests', pilotRequired, async (req, res) => {
   const pilot = req.user;
-  console.log(req.app.locals.currentSong,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ sdfghj")
-  console.log(req.app.locals,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ sdfghj")
+  console.log("\nreq.app.locals.currentSong",req.app.locals.currentSong)
+  // /console.log(req.app.locals,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ sdfghj")
   // Retrieve the balance from Stripe
   const balance = await stripe.balance.retrieve({
     stripe_account: pilot.stripeAccountId,
   });
   // Fetch the pilot's recent rides
   const songs = await pilot.listRecentSongs();
-  console.log("showing songs", songs)
+  // console.log("showing songs", songs)
   const songsTotalAmount = songs.reduce((a, b) => {
     return a + b.amountForPilot();
   }, 0);
@@ -85,17 +85,18 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
     balancePending: balance.pending[0].amount,
     songsTotalAmount: songsTotalAmount,
     songs: songs,
-    currentSong: songs[0]
+    currentSong: req.app.locals.currentSong
   });
-  currentSong: req.app.locals.currentSong
+  //currentSong: req.app.locals.currentSong
 });
 
-function  captureCharge(song, res){
+function captureCharge(song, res){
+  console.log("\ninside capture charge", song)
   const charge = stripe.charges.capture(song.stripeChargeId, (err, charge)=>{
-   if(err) throw new Error(err)
+   if(err) return new Error(err) // do we need to throw?
    else {
-     res.locals.currentSong = song;
-
+     //res.locals.currentSong = song;
+     req.app.locals.currentSong = song;
      res.redirect('/pilots/dashboard-requests' + '?' +  querystring.stringify(song))
     ;}
 
@@ -106,8 +107,24 @@ function  captureCharge(song, res){
  *
  * Generate a test ride with sample data for the logged-in pilot.
  */
-router.post('/auth-capture', pilotRequired,  (req, res, next) => {
-  const song = JSON.parse(req.body.song)
+router.post('/auth-capture', pilotRequired,  async(req, res, next) => {
+  const pilot = req.user;
+  const songs = await pilot.listRecentSongs();
+  for(let song of songs){
+    console.log("typeof song._id", typeof song._id) //object
+    if (song._id == req.body.songid){ // Note: song._id is an object and req.body.songid is a string
+      console.log("Found The SONG!")
+      console.log(song)
+      try{
+        captureCharge(song, res);
+      } catch(err){
+        console.log(err)
+        res.redirect('/pilots/dashboard-requests')
+      }    
+    }
+      
+  }
+  // const song = JSON.parse(req.body.song)
   // const pilot = req.user;
   // // Find a random passenger
   // const passenger = await Passenger.getRandom();
@@ -119,10 +136,10 @@ router.post('/auth-capture', pilotRequired,  (req, res, next) => {
   //   amount: getRandomInt(1000, 10000),
   // });
   // // Save the ride
-  try{
+  ////try{
    
    // console.log("cb done", charge, err) console.log("Invalid charge token")
-   captureCharge(song, res)
+   ////captureCharge(song, res)
  
     // try {
     //  // console.log("##########################################################################")
@@ -137,13 +154,11 @@ router.post('/auth-capture', pilotRequired,  (req, res, next) => {
     //   next(`Stripe Charge id not found: ${err.message}`);
     // }
 
-   }catch(err){
-    console.log("##########################################################################", err)
+   ////}catch(err){
+    ////console.log("##########################################################################", err)
     //next(`Stripe Charge id not found: ${err.message}`);
 
-  }
-  
-  
+  ////} 
 });
 
 /**

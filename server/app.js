@@ -64,12 +64,12 @@ app.use((req, res, next) => {
   if (req.user) {
     res.locals.pilot = req.user;
   }
-  if(req.body.song) {
+  ////if(req.body.song) {
     // req.body.song = JSON.parse(req.body.song)
-    req.app.locals.currentSong = JSON.parse(req.body.song)
+    ////req.app.locals.currentSong = JSON.parse(req.body.song)
    //next(null, req.body.song );
 
-  }
+  ////}
   next();
 });
 app.locals.moment = moment;
