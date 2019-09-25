@@ -90,22 +90,46 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
   //currentSong: req.app.locals.currentSong
 });
 
+/**
+ * Helper function to remove the song from the songs array
+ * 
+ * Todo:
+ *  1. create a new model transaction (played song)
+ *  2. remove song from array so remove it from db because of how we are listing the songs
+ *  3. show transactions not rides or songs on dashboard change view and get route 
+ */
+async function removeSong(song, req, res){
+  const pilot = req.user;
+  const passenger = await Passenger.getRandom();
+  const transaction = new Transaction({
+    pilot: req.body.id,
+    passenger: song.passenger,
+    // Generate a random amount between $10 and $100 for this ride
+    amount: song.amount
+  });
+  // Save the ride
+  await transaction.save(); // saves to the database
+  // song.remove
+}
+
+/**
+ * Helper function to capture the charge and redirect 
+ */
 function captureCharge(song, req, res){
   console.log("\ninside capture charge", song)
   const charge = stripe.charges.capture(song.stripeChargeId, (err, charge)=>{
    if(err) return new Error(err) // do we need to throw?
    else {
-     //res.locals.currentSong = song;
      req.app.locals.currentSong = song;
-     res.redirect('/pilots/dashboard-requests' + '?' +  querystring.stringify(song))
+     res.redirect('/pilots/dashboard-requests')
     ;}
 
   })
 }
 /**
- * POST /pilots/request
+ * POST /pilots/auth-capture
  *
- * Generate a test ride with sample data for the logged-in pilot.
+ * Capture the authorized charge 
  */
 router.post('/auth-capture', pilotRequired,  async(req, res, next) => {
   const pilot = req.user;
@@ -120,7 +144,8 @@ router.post('/auth-capture', pilotRequired,  async(req, res, next) => {
       } catch(err){
         console.log(err)
         res.redirect('/pilots/dashboard-requests')
-      }    
+      }  
+      // removeSong(song)
     }
       
   }
@@ -162,9 +187,9 @@ router.post('/auth-capture', pilotRequired,  async(req, res, next) => {
 });
 
 /**
- * POST /pilots/request-accept
+ * POST /pilots/auth-request
  *
- * Generate a test ride with sample data for the logged-in pilot.
+ * Generate a test request
  */
 router.post('/auth-request', pilotRequired, async (req, res, next) => {
   const pilot = req.user;
