@@ -18,8 +18,8 @@ block content
 
       .block.week
         p This week
-        h1 $#{(ridesTotalAmount / 100).toFixed(2)}
-        h2 #{rides.length} performances
+        h1 $#{(songsTotalAmount / 100).toFixed(2)}
+        h2 #{songs.length} performances
       .block.available
         p Your balance
         h1 $#{((balanceAvailable + balancePending) / 100).toFixed(2)}
@@ -31,18 +31,18 @@ block content
           a(href='/pilots/stripe/dashboard') View payouts on Stripe
     section.rides
       h4 Recent performances
-      if rides.length == 0
+      if songs.length == 0
         .no-rides
           .rocket
           h1 No performances to display yet
           h2 Rock out rockstar!
       else
         .list
-          each ride in rides
+          each song in songs
             .row
-              .cell.name= ride.passenger.displayName()
-              .cell.date= moment(new Date(Date.parse(ride.created))).calendar()
-              .cell.price $#{(ride.amountForPilot() / 100).toFixed(2)}
+              .cell.name= song.passenger.displayName()
+              .cell.date= moment(new Date(Date.parse(song.created))).calendar()
+              .cell.price $#{(song.amountForPilot() / 100).toFixed(2)}
 
 block footer
   .annotation.card.dashboard-banner(class=(showBanner ? '' : 'hidden'))

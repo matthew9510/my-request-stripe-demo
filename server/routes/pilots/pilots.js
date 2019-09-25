@@ -35,10 +35,9 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
   const balance = await stripe.balance.retrieve({
     stripe_account: pilot.stripeAccountId,
   });
-  // Fetch the pilot's recent rides
-  const rides = await pilot.listRecentRides();
-  console.log("showing rides",rides)
-  const ridesTotalAmount = rides.reduce((a, b) => {
+  // Fetch the performances played songs
+  const songs = await pilot.listRecentPlayedSongs();
+  const songsTotalAmount = songs.reduce((a, b) => {
     return a + b.amountForPilot();
   }, 0);
   const [showBanner] = req.flash('showBanner');
@@ -48,8 +47,8 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
     pilot: pilot,
     balanceAvailable: balance.available[0].amount,
     balancePending: balance.pending[0].amount,
-    ridesTotalAmount: ridesTotalAmount,
-    rides: rides,
+    songsTotalAmount: songsTotalAmount,
+    songs: songs,
     showBanner: !!showBanner || req.query.showBanner,
   });
 });
@@ -65,15 +64,13 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
  */
 router.get('/dashboard-requests', pilotRequired, async (req, res) => {
   const pilot = req.user;
-  console.log("\nreq.app.locals.currentSong",req.app.locals.currentSong)
-  // /console.log(req.app.locals,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ sdfghj")
+  console.log("\nreq.app.locals.currentSong", req.app.locals.currentSong)
   // Retrieve the balance from Stripe
   const balance = await stripe.balance.retrieve({
     stripe_account: pilot.stripeAccountId,
   });
   // Fetch the pilot's recent rides
   const songs = await pilot.listRecentSongs();
-  // console.log("showing songs", songs)
   const songsTotalAmount = songs.reduce((a, b) => {
     return a + b.amountForPilot();
   }, 0);
@@ -87,40 +84,20 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
     songs: songs,
     currentSong: req.app.locals.currentSong
   });
-  //currentSong: req.app.locals.currentSong
 });
 
-/**
- * Helper function to remove the song from the songs array
- * 
- * Todo:
- *  1. create a new model transaction (played song)
- *  2. remove song from array so remove it from db because of how we are listing the songs
- *  3. show transactions not rides or songs on dashboard change view and get route 
- */
-async function removeSong(song, req, res){
-  const pilot = req.user;
-  const passenger = await Passenger.getRandom();
-  const transaction = new Transaction({
-    pilot: req.body.id,
-    passenger: song.passenger,
-    // Generate a random amount between $10 and $100 for this ride
-    amount: song.amount
-  });
-  // Save the ride
-  await transaction.save(); // saves to the database
-  // song.remove
-}
 
 /**
  * Helper function to capture the charge and redirect 
  */
 function captureCharge(song, req, res){
   console.log("\ninside capture charge", song)
-  const charge = stripe.charges.capture(song.stripeChargeId, (err, charge)=>{
+  const charge = stripe.charges.capture(song.stripeChargeId, async (err, charge)=>{
    if(err) return new Error(err) // do we need to throw?
    else {
-     req.app.locals.currentSong = song;
+     req.app.locals.currentSong = song; // in memory not in database
+     song.played = true;
+     await song.save() // acts blocking 
      res.redirect('/pilots/dashboard-requests')
     ;}
 
@@ -135,7 +112,6 @@ router.post('/auth-capture', pilotRequired,  async(req, res, next) => {
   const pilot = req.user;
   const songs = await pilot.listRecentSongs();
   for(let song of songs){
-    //console.log("typeof song._id", typeof song._id) //object
     if (song._id == req.body.songid){ // Note: song._id is an object and req.body.songid is a string
       console.log("Found The SONG!")
       console.log(song)
@@ -145,45 +121,8 @@ router.post('/auth-capture', pilotRequired,  async(req, res, next) => {
         console.log(err)
         res.redirect('/pilots/dashboard-requests')
       }  
-      // removeSong(song)
-    }
-      
+    }      
   }
-  // const song = JSON.parse(req.body.song)
-  // const pilot = req.user;
-  // // Find a random passenger
-  // const passenger = await Passenger.getRandom();
-  // // Create a new ride for the pilot and this random passenger
-  // const ride = new Ride({
-  //   pilot: pilot.id,
-  //   passenger: passenger.id,
-  //   // Generate a random amount between $10 and $100 for this ride
-  //   amount: getRandomInt(1000, 10000),
-  // });
-  // // Save the ride
-  ////try{
-   
-   // console.log("cb done", charge, err) console.log("Invalid charge token")
-   ////captureCharge(song, res)
- 
-    // try {
-    //  // console.log("##########################################################################")
-    //   res.redirect('/pilots/dashboard-requests');
-     
-    // } catch (err1) {
-    //   throw(err)
-    //   console.log(err1, "catch");
-    //   // Return a 402 Payment Required error code
-    //   res.sendStatus(402);
-    //   throw(err1)
-    //   next(`Stripe Charge id not found: ${err.message}`);
-    // }
-
-   ////}catch(err){
-    ////console.log("##########################################################################", err)
-    //next(`Stripe Charge id not found: ${err.message}`);
-
-  ////} 
 });
 
 /**
@@ -232,7 +171,6 @@ router.post('/auth-request', pilotRequired, async (req, res, next) => {
     // Add the Stripe charge reference to the ride and save it
     song.stripeChargeId = charge.id;
     song.save();
-    
   } catch (err) {
     console.log(err);
     // Return a 402 Payment Required error code
