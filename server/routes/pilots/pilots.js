@@ -10,6 +10,7 @@ const Pilot = require('../../models/pilot');
 const Ride = require('../../models/ride');
 const Passenger = require('../../models/passenger');
 const Song = require("../../models/song");
+const SongInfo = require("../../models/songInfo");
 const querystring = require('querystring');
 
 // Middleware: require a logged-in pilot
@@ -134,10 +135,12 @@ router.post('/auth-request', pilotRequired, async (req, res, next) => {
   const pilot = req.user;
   // Find a random passenger
   const passenger = await Passenger.getRandom();
+  const songInfo = await SongInfo.getRandom();
   // Create a new ride for the pilot and this random passenger
   const song = new Song({
     pilot: pilot.id,
     passenger: passenger.id,
+    songInfo: songInfo.id,
     // Generate a random amount between $10 and $100 for this ride
     amount: getRandomInt(1000, 10000),
   });

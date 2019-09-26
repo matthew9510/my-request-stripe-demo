@@ -15,15 +15,16 @@ block content
 
 
 
-    section.rides
+    section.rides.additional-padding
       if currentSong 
         h4 Current Song
         .list
           .row
-            .cell.price #{currentSong.amount}
-            .cell.date= moment(new Date(Date.parse(currentSong.created))).calendar()
             .cell.name= currentSong.passenger.displayName()
-            .cell.date= moment(new Date(Date.parse(currentSong.created))).calendar()
+            .cell.date= moment(new Date(Date.parse(currentSong.created))).format('h:mm a')
+            .cell.songInfoDiv
+              .songInfoTitle=currentSong.songInfo.title
+              .songInfoArtist=currentSong.songInfo.artist
             .cell.price $#{(currentSong.amountForPilot() / 100).toFixed(2)}
          
       //- .block.week
@@ -51,7 +52,10 @@ block content
           each song in songs
             .row
               .cell.name= song.passenger.displayName()
-              .cell.date= moment(new Date(Date.parse(song.created))).calendar()
+              .cell.date= moment(new Date(Date.parse(song.created))).format('h:mm a')
+              .cell.songInfoDiv
+                .songInfoTitle=song.songInfo.title
+                .songInfoArtist=song.songInfo.artist
               .cell.price $#{(song.amountForPilot() / 100).toFixed(2)}
               form(action='/pilots/auth-capture', method='POST', autocomplete='off', class="accept-request")
                 input(type='text', name="songid", hidden=true, value=song._id)

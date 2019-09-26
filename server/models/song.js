@@ -16,6 +16,7 @@ const SongSchema = new Schema({
   currency: { type: String, default: 'usd' },
   created: { type: Date, default: Date.now },
   played: { type: Boolean, default: false},
+  songInfo: {type: Schema.ObjectId, ref:'SongInfo', required: true},
 
   // Stripe charge ID corresponding to this ride.
   stripeChargeId: String

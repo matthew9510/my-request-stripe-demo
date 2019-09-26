@@ -42,6 +42,9 @@ block content
             .row
               .cell.name= song.passenger.displayName()
               .cell.date= moment(new Date(Date.parse(song.created))).calendar()
+              .cell.songInfoDiv
+                .songInfoTitle=song.songInfo.title
+                .songInfoArtist=song.songInfo.artist
               .cell.price $#{(song.amountForPilot() / 100).toFixed(2)}
 
 block footer
