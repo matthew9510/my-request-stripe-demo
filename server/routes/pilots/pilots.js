@@ -39,7 +39,7 @@ router.get('/dashboard', pilotRequired, async (req, res) => {
   // Fetch the performances played songs
   const songs = await pilot.listRecentPlayedSongs();
   const songsTotalAmount = songs.reduce((a, b) => {
-    return a + b.amountForPilot();
+    return a + b.amount - 100;
   }, 0);
   const [showBanner] = req.flash('showBanner');
   // There is one balance for each currencies used: as this 
@@ -73,7 +73,7 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
   // Fetch the pilot's recent rides
   const songs = await pilot.listRecentSongs();
   const songsTotalAmount = songs.reduce((a, b) => {
-    return a + b.amountForPilot();
+    return a + b.amount - 100;
   }, 0);
   // There is one balance for each currencies used: as this 
   // demo app only uses USD we'll just use the first object
@@ -93,10 +93,10 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
  */
 function captureCharge(song, req, res){
   console.log("\ninside capture charge", song)
-  const charge = stripe.charges.capture(song.stripeChargeId, async (err, charge)=>{
+  const charge = stripe.charges.capture(song.stripeChargeId,  {application_fee: 100}, async (err, charge)=>{
    if(err) return new Error(err) // do we need to throw?
-   else {
-     req.app.locals.currentSong = song; // in memory not in database
+   else { 
+    req.app.localsc = song
      song.played = true;
      await song.save() // acts blocking 
      res.redirect('/pilots/dashboard-requests')
@@ -166,7 +166,7 @@ router.post('/auth-request', pilotRequired, async (req, res, next) => {
       transfer_data: {
         // Send the amount for the pilot after collecting a 20% platform fee:
         // the `amountForPilot` method simply computes `ride.amount * 0.8`
-        amount: song.amountForPilot(),
+        //amount: song.amountForPilot(),
         // The destination of this charge is the pilot's Stripe account
         destination: pilot.stripeAccountId,
       },

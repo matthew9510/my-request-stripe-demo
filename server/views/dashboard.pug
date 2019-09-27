@@ -45,7 +45,7 @@ block content
               .cell.songInfoDiv
                 .songInfoTitle=song.songInfo.title
                 .songInfoArtist=song.songInfo.artist
-              .cell.price $#{(song.amountForPilot() / 100).toFixed(2)}
+              .cell.price $#{((song.amount - 100 ) / 100).toFixed(2)}
 
 block footer
   .annotation.card.dashboard-banner(class=(showBanner ? '' : 'hidden'))
@@ -56,13 +56,4 @@ block footer
       p This account ID can then be used to #[a(href="https://stripe.com/docs/api/balance/balance_retrieve" target="_blank") retrieve the performers’s balance], provide a #[a(href="https://stripe.com/docs/connect/destination-charges" target="_blank") destination for payments], or #[a(href="https://stripe.com/docs/connect/payouts#instant-payouts" target="_blank") create Instant Payouts].
     form.right
       button.primary-action.next Next step
-  .annotation.card.dashboard-simulate(class=(showBanner ? 'hidden' : ''))
-    h4 Simulate a performance to create a payment for this performer.
-      a.show-more(href="#") &nbsp;(show more)
-    .description
-      ol
-        li The balance is automatically fetched from the Stripe API.
-        li #[strong View payouts on Stripe] lets performers see their payouts or edit their account information.
-        li #[strong Pay out now] uses the Stripe API to #[a(href="https://stripe.com/docs/connect/payouts#instant-payouts" target="_blank") generate a payout] of the available balance. #[a(href="https://stripe.com/docs/connect/payouts#instant-payouts" target="_blank") Instant Payouts] are available with a debit card.
-    form.right(action='/pilots/rides', method='POST', autocomplete='off')
-      input(type='submit', name="immediate_balance", value='Create performance', class='primary-action')
+  
