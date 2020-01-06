@@ -57,6 +57,9 @@ block content
                 .songInfoTitle=song.songInfo.title
                 .songInfoArtist=song.songInfo.artist
               .cell.price $#{((song.amount - 100) / 100).toFixed(2)}
+              form(action='/pilots/reject-request', method='POST', autocomplete='off', class="accept-request")
+                input(type='text', name="songid", hidden=true, value=song._id)
+                button(type='submit', name="cancel-the-request", class="cancel-request") Cancel request
               form(action='/pilots/auth-capture', method='POST', autocomplete='off', class="accept-request")
                 input(type='text', name="songid", hidden=true, value=song._id)
                 button(type='submit', name="accept-the-request", class="accept-request") Accept request

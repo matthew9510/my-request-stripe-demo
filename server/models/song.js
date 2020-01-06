@@ -17,6 +17,10 @@ const SongSchema = new Schema({
   created: { type: Date, default: Date.now },
   played: { type: Boolean, default: false},
   songInfo: {type: Schema.ObjectId, ref:'SongInfo', required: true},
+  
+  // todo - still implement linking refund object? 
+  // refund: {type: any }
+  refund: { type: Boolean, default: false},
 
   // Stripe charge ID corresponding to this ride.
   stripeChargeId: String

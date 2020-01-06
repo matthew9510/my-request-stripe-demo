@@ -930,6 +930,10 @@ img.schedule{
   margin-bottom: 20px;
 }
 
+button.cancel-request{
+  color: white;
+  background-color: red;
+}
 form.accept-request{
   flex:.7;
   padding-right: 20px;

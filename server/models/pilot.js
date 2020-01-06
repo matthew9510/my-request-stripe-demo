@@ -57,7 +57,7 @@ PilotSchema.methods.listRecentPlayedSongs = function() {
 // List songs of the past week for the performer.
 PilotSchema.methods.listRecentSongs = function() {
   const weekAgo = Date.now() - (7*24*60*60*1000);
-  return Song.find({ pilot: this, created: { $gte: weekAgo }, played:false })
+  return Song.find({ pilot: this, created: { $gte: weekAgo }, played:false, refund: false })
     .populate('passenger')
     .populate('songInfo')
     .sort({ created: -1 })

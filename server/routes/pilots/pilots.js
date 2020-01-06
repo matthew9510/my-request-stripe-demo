@@ -87,6 +87,59 @@ router.get('/dashboard-requests', pilotRequired, async (req, res) => {
   });
 });
 
+/**
+ * Helper function to reject the charge and redirect 
+ */
+function rejectCharge(song, req, res){
+  console.log("\ninside reject charge\n Song:\n", song)
+  console.log("\nstripe charge id:\n", song.stripeChargeId)
+
+  stripe.refunds.create({
+    charge: song.stripeChargeId,
+    amount: song.amount,
+    reason: "requested_by_customer"
+  }, async function(err, refund) {
+    // asynchronously called
+    // if(err) return new Error(err)
+    if(err) console.log(err)
+    else{
+      // todo - still implement a link to the refund object
+      //song.refund = refund;
+      song.refund = true;
+
+      await song.save()
+      console.log('refund done')
+      console.log(song.refund)
+
+      // redirect to dashboard requests where we filter not showing refunds
+      
+      res.redirect('/pilots/dashboard-requests')
+    }
+  });
+}
+
+/**
+ * POST /pilots/reject-request
+ *
+ * Cancel the Stripe authorization 
+ */
+router.post('/reject-request', pilotRequired,  async(req, res, next) => {
+  console.log("Inside /reject-request")
+  const pilot = req.user;
+  const songs = await pilot.listRecentSongs();
+  for(let song of songs){
+    if (song._id == req.body.songid){ // Note: song._id is an object and req.body.songid is a string
+      console.log("Found The SONG!")
+      console.log(song)
+      try{
+        rejectCharge(song, req, res);
+      } catch(err){
+        console.log(err, "couldn't find song")
+        res.redirect('/pilots/dashboard-requests')
+      }  
+    }      
+  }
+});
 
 /**
  * Helper function to capture the charge and redirect 
@@ -96,7 +149,7 @@ function captureCharge(song, req, res){
   const charge = stripe.charges.capture(song.stripeChargeId,  {application_fee: 100}, async (err, charge)=>{
    if(err) return new Error(err) // do we need to throw?
    else { 
-    req.app.localsc = song
+    req.app.locals.currentSong = song
      song.played = true;
      await song.save() // acts blocking 
      res.redirect('/pilots/dashboard-requests')

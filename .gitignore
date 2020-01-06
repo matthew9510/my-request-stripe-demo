@@ -72,3 +72,6 @@ typings/
 
 # dotenv environment variables file
 .env
+
+# User Added Exclusions
+.idea
