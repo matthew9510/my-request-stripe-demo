@@ -75,3 +75,6 @@ typings/
 
 # User Added Exclusions
 .idea
+
+# amazon 
+assets
