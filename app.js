@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('./config');
+const config = require('./config_test');
 const express = require('express');
 const session = require('cookie-session');
 const passport = require('passport');
